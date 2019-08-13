@@ -1,0 +1,54 @@
+##################
+# Run from ~/imgclas as
+# $> docker build -t dockerimage -f docker/Dockerfile.dev .
+# Then use as
+# $> docker run -ti -v ~/imgclas:/app dockerimage /bin/bash
+##################
+# Base image, e.g. tensorflow/tensorflow:1.7.0
+FROM Base docker image for Dockerfile, e.g. tensorflow/tensorflow:1.7.0. Has to match python version!
+
+LABEL maintainer='Ignacio Heredia (CSIC)'
+# This is a plug-and-play tool to train and evaluate an image classifier on a custom dataset using deep neural networks.
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install -y --no-install-recommends \
+         git \
+         curl \
+         wget \
+         python3-setuptools \
+         python3-pip \
+         python3-wheel && \ 
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /root/.cache/pip/* && \
+    rm -rf /tmp/*
+
+# Set LANG environment
+ENV LANG C.UTF-8
+
+# Set the working directory
+WORKDIR /app
+
+# Install python packages listed in requirements.txt
+COPY requirements.txt /root
+RUN pip --no-cache-dir install -r /root/requirements.txt \
+### (OPTIONAL!) If you want to use Jupyter, uncomment:
+#        jupyter \
+#        jupyterlab && \
+#   python -m ipykernel.kernelspec \
+###
+    && \
+    rm -rf /root/.cache/pip/* && \
+    rm -rf /tmp/*
+
+### (OPTIONAL!) If you want to use Jupyter, uncomment: 
+## Set up our notebook config.
+#COPY docker/jupyter/jupyter_notebook_config.py /root/.jupyter/
+#COPY docker/jupyter/run_jupyter.sh /
+## For Jupyter terminal
+#ENV SHELL /bin/bash
+#
+## REMINDER: Tensorflow Docker Images already EXPOSE ports 6006 and 8888
+#EXPOSE 8888
+###
+

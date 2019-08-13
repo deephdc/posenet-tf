@@ -1,0 +1,29 @@
+# Base image, e.g. tensorflow/tensorflow:1.7.0
+FROM Base docker image for Dockerfile, e.g. tensorflow/tensorflow:1.7.0. Has to match python version!
+
+LABEL maintainer='Ignacio Heredia (CSIC)'
+# This is a plug-and-play tool to train and evaluate an image classifier on a custom dataset using deep neural networks.
+
+RUN apt-get update && \ 
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /root/.cache/pip/* && \
+    rm -rf /tmp/*
+
+# Set LANG environment
+ENV LANG C.UTF-8
+
+# Set the working directory
+WORKDIR /app
+
+# Script to run pylint
+COPY imgclas/tests/run_pylint.sh /app
+
+# Copy the current directory contents into the container at /app
+ADD . /app
+
+# Install pylint and python packages listed in test-requirements.txt
+RUN pip --no-cache-dir install -r /app/requirements.txt && \
+    rm -rf /root/.cache/pip/* && \
+    rm -rf /tmp/*
+

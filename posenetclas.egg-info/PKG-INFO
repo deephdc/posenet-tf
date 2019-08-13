@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: posenetclas
+Version: 0.1.0.dev21
+Summary: This is a plug-and-play tool to train and evaluate an image classifier on a custom dataset using deep neural networks.
+Home-page: http://github.com/indigo-dc/posenetclas
+Author: Ignacio Heredia (CSIC)
+Author-email: iheredia@ifca.unican.es
+License: Apache
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6

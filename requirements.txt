@@ -1,0 +1,17 @@
+# external requirements
+Sphinx
+python-dotenv>=0.5.1
+numpy>=1.14.5
+tensorboardX>=1.4
+opencv-python>=3.4.1.4
+albumentations>=0.1.8
+tqdm>=4.25.0 
+requests>=2.18.4    
+PyYAML>=3.12
+matplotlib>=2.2.2
+Jinja2>=2.10
+Flask>=1.0.2
+Werkzeug>=0.14.1
+gunicorn>=19.9.0
+seaborn>=0.8.1
+scikit-learn>=0.19.1

@@ -1,0 +1,208 @@
+# Configuration file for the image classification application
+#
+# Date: July 2019
+# Author: Lara Lloret Iglesias
+# Email: lloret@ifca.unican.es
+# Github: laramaktub
+#
+# References
+# ----------
+# https://pyyaml.org/wiki/PyYAMLDocumentation
+
+
+#####################################################
+# Options for general configuration
+#####################################################
+
+general:
+
+  base_directory:
+    value: "."
+    type: "str"
+    help: >
+          Base directory for data and models. All the data that will be read and written will be done within this
+          directory.
+          If path is relative it will be appended to the package path.
+
+
+  data_dir:
+    value: "data/output"
+    type: "str"
+    help: >
+          Base directory for images. If the path is relative, it will be appended to the package path.
+  
+  data_url:
+    value: ""
+    type: "str"
+    help: >
+          You can indicate here the URL to the tar.gz containing your training audio files
+
+
+
+model_settings:
+
+
+  wanted_words:
+    type: "str"
+    value: "yes,no,up,down,left,right,on,off,stop,go"
+    help: >
+          Words to use (others will be added to an unknown label)
+  
+  sample_rate:
+    type: "int"
+    value: 16000
+    help: >
+          Expected sample rate of the wavs
+
+  clip_duration_ms:
+    type: "int"
+    value: 1000
+    help: >
+          Expected duration in milliseconds of the wavs
+  
+  window_size_ms:
+    type: "float"
+    value: 30.0
+    help: >
+          How long each spectrogram timeslice is
+
+  window_stride_ms:
+    type: "float"
+    value: 10.0
+    help: > 
+          How far to move in time between spectogram timeslices.
+
+  feature_bin_count:
+    type: "int"
+    value: 40
+    help: >
+          How many bins to use for the MFCC fingerprint
+
+  dct_coefficient_count:
+    type: "int"
+    value: 40
+    help: >
+          How many bins to use for the MFCC fingerprint
+
+audio_processor:
+
+  silence_percentage:
+    type: "float"
+    value: 10.0 
+    help: >
+          How much of the training data should be silence
+
+  unknown_percentage:
+    type: "float"
+    value: 10.0
+    help: > 
+          How much of the training data should be unknown words
+
+  time_shift_ms:
+    type: "float"
+    value: 100.0
+    help: >
+          Range to randomly shift the training audio by in time
+
+
+  sample_rate:
+    type: "int"
+    value: 16000
+    help: >
+          Expected sample rate of the wavs
+
+  clip_stride_ms:
+    type: "int"
+    value: 30
+    help: >
+         How often to run recognition. Useful for models with cache
+
+
+training_parameters:
+
+  testing_percentage:
+    type: "int"
+    value: 10
+    help: > 
+          What percentage of wavs to use as a test set
+  
+  validation_percentage:
+    type: "int"
+    value: 10
+    help: >
+          What percentage of wavs to use as a validation set
+
+  batch_size:
+    type: "int"
+    value: 100
+    help: >
+          How many items to train with at once
+
+  save_step_interval:
+    type: "int"
+    value: 100
+    help: >
+          Save model checkpoint every save_steps
+
+
+  output_file:
+    type: "str"
+    value: "model.pb"
+    help: >
+          Model file in pb format
+
+
+  model_architecture:
+    type: "str"
+    value: "conv"
+    help: >
+          What model architecture to use
+
+  learning_rate:
+    type: "str"
+    value: "0.001,0.0001"
+    help: >
+          How large a learning rate to use when training
+
+  summaries_dir:
+    type: "str"
+    value: "logs"
+    help: >
+          Where to save summary logs for TensorBoard
+
+  check_nans:
+    type: "bool"
+    value: False
+    help: >
+          Whether to check for invalid numbers during processing
+
+  background_volume:
+    type: "float"
+    value: 0.1
+    help: >
+          How loud the background noise should be, between 0 and 1
+
+  background_frequency:
+    type: "float"
+    value: 0.8
+    help: >
+          How many of the training samples have background noise mixed in
+
+  start_checkpoint:
+    type: "str"
+    value: ""
+    help: >
+          If specified, restore this pretrained model before any training
+
+
+  how_many_training_steps:
+    type: "str"
+    value: "10,10"
+    help: >
+          How many training loops to run
+
+  eval_step_interval:
+    type: "int"
+    value: 400
+    help: >
+          How often to evaluate the training results
