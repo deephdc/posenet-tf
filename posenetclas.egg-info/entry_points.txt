@@ -1,3 +1,0 @@
-[deepaas.model]
-posenetclas = posenetclas.api
-
