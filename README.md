@@ -34,7 +34,7 @@ pip install -e .
 ## Workflow
 
 
-### 3. Test
+### Test
 
 You can test the posenet module on a number of tasks: predict a single local image file (or url) or predict multiple images (or urls). 
 
