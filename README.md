@@ -1,4 +1,4 @@
-DEEP Open Catalogue: Speech to Text
+DEEP Open Catalogue: Pose Estimation
 ====================================
 
 [![Build Status](https://jenkins.indigo-datacloud.eu:8080/buildStatus/icon?job=Pipeline-as-code/DEEP-OC-org/posenet-tf/master)](https://jenkins.indigo-datacloud.eu:8080/job/Pipeline-as-code/job/DEEP-OC-org/job/posenet-tf/job/master/)
