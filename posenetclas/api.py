@@ -166,9 +166,15 @@ def predict_data(images, merge=True):
         thefile=timestamp_folder+thename
         image['files'].save(thefile)
 
-    # Stream the file back
+    with open(timestamp_folder+'data.json', 'w') as f:
+        json.dump(format_prediction(image_demo.posenet_image(timestamp)), f)
+    print("json file ...> " , timestamp_folder+"/data.json")
+    print("timestamp folder ", timestamp_folder)
+    print("thename", thename)
+    print(flask.url_for('static', filename=thefile))
+    flask.redirect(flask.url_for('static', filename=thefile))
+    return flask.send_from_directory("/tmp/2019-09-02_161836","data.json" and thename)
 
-    return format_prediction(image_demo.posenet_image(timestamp)), flask.send_file(filename_or_fp=thefile, as_attachment=True,  attachment_filename=os.path.basename(output_path))
 
 
 
