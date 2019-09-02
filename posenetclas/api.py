@@ -26,6 +26,7 @@ import pkg_resources
 import builtins
 import re
 import urllib.request
+import flask
 
 import numpy as np
 import requests
@@ -165,8 +166,9 @@ def predict_data(images, merge=True):
         thefile=timestamp_folder+thename
         image['files'].save(thefile)
 
+    # Stream the file back
 
-    return format_prediction(image_demo.posenet_image(timestamp))
+    return format_prediction(image_demo.posenet_image(timestamp)), flask.send_file(filename_or_fp=thefile, as_attachment=True,  attachment_filename=os.path.basename(output_path))
 
 
 
