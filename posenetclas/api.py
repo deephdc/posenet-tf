@@ -120,27 +120,21 @@ def predict_url(urls, merge=True):
 
     catch_url_error(urls)
     imagename=os.path.basename(urls['urls'][0])
-    urllib.request.urlretrieve(urls['urls'][0], '/tmp/'+timestamp+"/"+imagename)
-    
-    return format_prediction(image_demo.posenet_image(timestamp))
+    urllib.request.urlretrieve(urls['urls'][0], timestamp_folder+imagename)
 
-    
-
+    predict_json, output_image= image_demo.posenet_image(timestamp) 
+    predict_output= format_prediction(predict_json)
 
 
-@catch_error
-def predict_file(filenames, merge=True):
-    """
-    Function to predict a local image
+    if urls['output'][0]=='image':
+        predict_output= flask.send_from_directory(os.path.dirname(output_image),os.path.basename(output_image))
 
-    """
+    if urls['output'][0]=='json':
+        predict_output= format_prediction(predict_json)
 
-    timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
-    timestamp_folder="/tmp/"+timestamp+"/"
+    return predict_output
 
-    catch_localfile_error(filenames)
 
-    return format_prediction(image_demo.posenet_image(timestamp))
 
 
 
@@ -165,13 +159,18 @@ def predict_data(images, merge=True):
         thename=image['files'].filename
         thefile=timestamp_folder+thename
         image['files'].save(thefile)
-    print(image['output'])
+
+    predict_json, output_image= image_demo.posenet_image(timestamp) 
+    predict_output= format_prediction(predict_json)
+
+
     if image['output'][0]=='image':
-        return flask.send_from_directory(timestamp_folder,thename)
+        predict_output= flask.send_from_directory(os.path.dirname(output_image),os.path.basename(output_image))
 
     if image['output'][0]=='json':
-        print("Entra aqui")
-        return format_prediction(image_demo.posenet_image(timestamp))
+        predict_output= format_prediction(predict_json)
+
+    return predict_output
 
 
 def format_prediction(labels):
