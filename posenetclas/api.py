@@ -165,16 +165,13 @@ def predict_data(images, merge=True):
         thename=image['files'].filename
         thefile=timestamp_folder+thename
         image['files'].save(thefile)
+    print(image['output'])
+    if image['output'][0]=='image':
+        return flask.send_from_directory(timestamp_folder,thename)
 
-    #with open(timestamp_folder+'data.json', 'w') as f:
-    #    json.dump(format_prediction(image_demo.posenet_image(timestamp)), f)
-    #flask.redirect(flask.url_for('static', filename=thefile))
-    #return flask.send_from_directory("/tmp/2019-09-02_161836","data.json" and thename)
-
-
-    # Stream the file back
-    #flask.send_file(filename_or_fp=thefile, as_attachment=True,  attachment_filename=os.path.basename(output_path))
-    return format_prediction(image_demo.posenet_image(timestamp))
+    if image['output'][0]=='json':
+        print("Entra aqui")
+        return format_prediction(image_demo.posenet_image(timestamp))
 
 
 def format_prediction(labels):
