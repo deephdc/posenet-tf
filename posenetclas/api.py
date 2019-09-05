@@ -83,7 +83,6 @@ def catch_url_error(url_list):
         except:
             raise BadRequest("""Failed url connection:
             Check you wrote the url address correctly.""")
-        print("tipo de imagen ------------------------------------------>    ", url_type.split('/')[0])
         # Error catch: Wrong formatted urls
         if url_type.split('/')[0] != 'image':
             raise BadRequest("""Url image format error:
