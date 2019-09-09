@@ -163,9 +163,7 @@ def predict_data(images, merge=True):
     predict_json, output_image= image_demo.posenet_image(timestamp) 
     predict_output= format_prediction(predict_json)
 
-    print("the image accept ---> ", image['accept'])
     if image['accept']=='image/jpeg' or image['accept']=='image/png':
-        print(" ENTERS HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         predict_output= flask.send_from_directory(os.path.dirname(output_image),os.path.basename(output_image))
 
     if image['accept']=='application/json':
