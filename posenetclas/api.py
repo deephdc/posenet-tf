@@ -122,6 +122,7 @@ def predict_url(urls, merge=True):
     urllib.request.urlretrieve(urls['urls'][0], timestamp_folder+imagename)
 
     predict_json, output_image= image_demo.posenet_image(timestamp) 
+
     predict_output= format_prediction(predict_json)
 
 

@@ -59,11 +59,13 @@ def posenet_image(timestamp):
                 draw_image = draw_skel_and_kp(
                     draw_image, pose_scores, keypoint_scores, keypoint_coords,
                     min_pose_score=0.25, min_part_score=0.25)
-                imgpath=os.path.join(output_dir, os.path.relpath(f, image_dir))
-                cv2.imwrite(imgpath, draw_image)
+                output_image=os.path.join(output_dir, os.path.relpath(f, image_dir))
+                cv2.imwrite(output_image, draw_image)
+                
+     
 
             if True:
-                imgdict = {"output": imgpath}
+                imgdict = {"output": output_image}
                 print()
                 print("Results for image: %s" % f)
                 for pi in range(len(pose_scores)):
@@ -76,6 +78,6 @@ def posenet_image(timestamp):
             
             dictoutput.append(imgdict)
     print('Average FPS:', len(filenames) / (time.time() - start))
-    return dictoutput
+    return dictoutput, output_image
 
 
