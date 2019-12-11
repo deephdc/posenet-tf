@@ -5,7 +5,7 @@ numpy>=1.14.5
 opencv-python>=4.1.2
 requests>=2.18.4
 PyYAML>=3.12
-python-magic>=0.4.15￼
+python-magic>=0.4.15
 webargs>=5.5.2
 aiohttp>=3.6.2
 deepaas
