@@ -1,9 +1,12 @@
 import tensorflow as tf
 import os
+
 import posenetclas.converter.config
 import posenetclas
+from posenetclas import paths
 
-MODEL_DIR = './_models'
+
+MODEL_DIR = paths.get_models_dir()
 DEBUG_OUTPUT = False
 
 

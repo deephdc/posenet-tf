@@ -5,59 +5,26 @@ Date: September 2018
 Author: Lara Lloret Iglesias
 Email: lloret@ifca.unican.es
 Github: laramaktub
-
-
-Descriptions:
-The API will use the model files inside ../models/api. If not found it will use the model files of the last trained model.
-If several checkpoints are found inside ../models/api/ckpts we will use the last checkpoint.
-
-Warnings:
-There is an issue of using Flask with Keras: https://github.com/jrosebr1/simple-keras-rest-api/issues/1
-The fix done (using tf.get_default_graph()) will probably not be valid for standalone wsgi container e.g. gunicorn,
-gevent, uwsgi.
 """
 
-import json
+from collections import OrderedDict
 import os
-import tempfile
-import warnings
-from datetime import datetime
 import pkg_resources
-import builtins
 import re
-import urllib.request
-import flask
+import shutil
 
-import numpy as np
+from aiohttp.web import HTTPBadRequest
 import requests
-from werkzeug.exceptions import BadRequest
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras import backend as K
+import urllib.request
+from webargs import fields, validate
 
-from posenetclas import paths, utils, config, label_wav
-from posenetclas.data_utils import load_class_names, load_class_info, mount_nextcloud
-from posenetclas import image_demo
+from posenetclas import config, test_utils, utils
+
 
 CONF = config.conf_dict()
 
-
-# Mount NextCloud folders (if NextCloud is available)
-try:
-    mount_nextcloud('ncplants:/data/output', paths.get_base_dir())
-    #mount_nextcloud('ncplants:/models', paths.get_models_dir())
-except Exception as e:
-    print(e)
-
-# Empty model variables for inference (will be loaded the first time we perform inference)
-loaded = False
-graph, model, conf, class_names, class_info = None, None, None, None, None
-
 # Additional parameters
-allowed_extensions = set(['wav']) # allow only certain file extensions
-top_K = 5  # number of top classes predictions to return
-
-
+allowed_extensions = set(['png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG'])  # allow only certain file extensions
 
 
 def catch_error(f):
@@ -65,174 +32,159 @@ def catch_error(f):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            raise e
+            raise HTTPBadRequest(reason=e)
     return wrap
 
 
 def catch_url_error(url_list):
 
-    url_list=url_list['urls']
     # Error catch: Empty query
     if not url_list:
-        raise BadRequest('Empty query')
+        raise ValueError('Empty query')
 
     for i in url_list:
-        # Error catch: Inexistent url
-        try:
-            url_type = requests.head(i).headers.get('content-type')
-        except:
-            raise BadRequest("""Failed url connection:
-            Check you wrote the url address correctly.""")
-        # Error catch: Wrong formatted urls
-        if url_type.split('/')[0] != 'image':
-            raise BadRequest("""Url image format error:
-            Some urls were not in image format.""")
+        if not i.startswith('data:image'):  # don't do the checks for base64 encoded images
+
+            # Error catch: Inexistent url
+            try:
+                url_type = requests.head(i).headers.get('content-type')
+            except Exception:
+                raise ValueError("Failed url connection: "
+                                 "Check you wrote the url address correctly.")
+
+            # Error catch: Wrong formatted urls
+            if url_type.split('/')[0] != 'image':
+                raise ValueError("Url image format error: Some urls were not in image format. "
+                                 "Check you didn't uploaded a preview of the image rather than the image itself.")
 
 
 def catch_localfile_error(file_list):
 
     # Error catch: Empty query
-    if not file_list[0].filename:
-        raise BadRequest('Empty query')
+    if not file_list:
+        raise ValueError('Empty query')
 
     # Error catch: Image format error
     for f in file_list:
-        extension = f.split('.')[-1]
+        extension = os.path.basename(f.content_type).split('/')[-1]
+        # extension = mimetypes.guess_extension(f.content_type)
         if extension not in allowed_extensions:
-            raise BadRequest("""Local image format error:
-            At least one file is not in a standard image format (jpg|jpeg|png).""")
+            raise ValueError("Local image format error: "
+                             "At least one file is not in a standard image format ({}).".format(allowed_extensions))
+
+
+def warm():
+    test_utils.load_predict_model()
 
 
 @catch_error
-def predict_url(urls, merge=True):
+def predict(**args):
+
+    if (not any([args['urls'], args['files']]) or
+            all([args['urls'], args['files']])):
+        raise Exception("You must provide either 'url' or 'data' in the payload")
+
+    if args['files']:
+        args['files'] = [args['files']]  # patch until list is available
+        return predict_data(args)
+    elif args['urls']:
+        args['urls'] = [args['urls']]  # patch until list is available
+        return predict_url(args)
+
+
+def predict_url(args):
     """
     Function to predict an url
     """
+    catch_url_error(args['urls'])
 
-    timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
-    timestamp_folder="/tmp/"+timestamp+"/"
+    # Download images
+    dir_path = utils.create_tmp_folder()
+    filepaths = []
+    for url in args['urls']:
+        tmp_path = os.path.join(dir_path, os.path.basename(url))
+        urllib.request.urlretrieve(url, tmp_path)
+        filepaths.append(tmp_path)
+
+    output_dir = None
+    if args['accept'] in ['image/png', 'application/zip']:
+        output_dir = utils.create_tmp_folder()
 
     try:
-        os.stat(timestamp_folder)
-    except:
-        os.mkdir(timestamp_folder)
+        outputs = test_utils.predict_images(filepaths=filepaths, output_dir=output_dir)
+    finally:
+        for f in filepaths:
+            os.remove(f)
 
-    catch_url_error(urls)
-    imagename=os.path.basename(urls['urls'][0])
-    urllib.request.urlretrieve(urls['urls'][0], timestamp_folder+imagename)
-
-    predict_json, output_image= image_demo.posenet_image(timestamp) 
-
-    predict_output= format_prediction(predict_json)
+    return format_prediction(outputs, output_dir, content_type=args['accept'])
 
 
-    if urls['output'][0]=='image':
-        predict_output= flask.send_from_directory(os.path.dirname(output_image),os.path.basename(output_image))
-
-    if urls['output'][0]=='json':
-        predict_output= format_prediction(predict_json)
-
-    return predict_output
-
-
-
-
-
-@catch_error
-def predict_data(images, merge=True):
+def predict_data(args):
     """
     Function to predict an image file
     """
-    timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
-    timestamp_folder="/tmp/"+timestamp+"/"
+    catch_localfile_error(args['files'])
+    filepaths = [f.filename for f in args['files']]
+
+    output_dir = None
+    if args['accept'] in ['image/png', 'application/zip']:
+        output_dir = utils.create_tmp_folder()
 
     try:
-        os.stat(timestamp_folder)
-    except:
-        os.mkdir(timestamp_folder)
+        outputs = test_utils.predict_images(filepaths=filepaths, output_dir=output_dir)
+    finally:
+        for f in filepaths:
+            os.remove(f)
 
-    if not isinstance(images, list):
-        images = [images]
-    filenames = []
-    for image in images:
-
-        thename=image['files'].filename
-        thefile=timestamp_folder+thename
-        image['files'].save(thefile)
-
-    predict_json, output_image= image_demo.posenet_image(timestamp) 
-    predict_output= format_prediction(predict_json)
-
-    if image['accept']=='image/jpeg' or image['accept']=='image/png':
-        predict_output= flask.send_from_directory(os.path.dirname(output_image),os.path.basename(output_image))
-
-    if image['accept']=='application/json':
-        predict_output= format_prediction(predict_json)
-
-    return predict_output
+    return format_prediction(outputs, output_dir, content_type=args['accept'])
 
 
-def format_prediction(labels):
+def format_prediction(outputs, output_dir, content_type):
+
+    if content_type == 'image/png':
+        return open(outputs[0]['img_path'], 'rb')
+
+    elif content_type == 'application/json':
+        return outputs
+
+    elif content_type == 'application/zip':
+        f = shutil.make_archive(base_name=output_dir,
+                                format='zip',
+                                root_dir=output_dir)
+        return open(f, 'rb')
 
 
-    for label in labels:
-        d = {
-            "status": "ok",
-            "output": labels[0]["output"],
-            "predictions": [],
-        }
+def get_predict_args():
 
-        for thekey in label:
-            if thekey!="output":
-                pred={
-                thekey:label[thekey]
-                }
-                d["predictions"].append(pred)
+    parser = OrderedDict()
 
+    # Add data and url fields
+    parser['files'] = fields.Field(required=False,
+                                   missing=None,
+                                   type="file",
+                                   data_key="data",
+                                   location="form",
+                                   description="Select the image you want to classify.")
 
-    return d
+    # Use field.String instead of field.Url because I also want to allow uploading of base 64 encoded data strings
+    parser['urls'] = fields.String(required=False,
+                                   missing=None,
+                                   description="Select an URL of the image you want to classify.")
+    # missing action="append" --> append more than one url
 
+    # Add format type of the response
+    parser['accept'] = fields.Str(description="Media type(s) that is/are acceptable for the response.",
+                                  missing='application/zip',
+                                  validate=validate.OneOf(['application/zip', 'image/png', 'application/json']))
 
-def image_link(pred_lab):
-    """
-    Return link to Google images
-    """
-    base_url = 'https://www.google.es/search?'
-    params = {'tbm':'isch','q':pred_lab}
-    link = base_url + requests.compat.urlencode(params)
-    return link
+    return parser
 
 
-def wikipedia_link(pred_lab):
-    """
-    Return link to wikipedia webpage
-    """
-    base_url = 'https://en.wikipedia.org/wiki/'
-    link = base_url + pred_lab.replace(' ', '_')
-    return link
-
-
-def metadata():
-    d = {
-        "author": None,
-        "description": None,
-        "url": None,
-        "license": None,
-        "version": None,
-    }
-    return d
-
-
-
-
-@catch_error
 def get_metadata():
     """
     Function to read metadata
     """
-
     module = __name__.split('.', 1)
-
     pkg = pkg_resources.get_distribution(module[0])
     meta = {
         'Name': None,

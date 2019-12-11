@@ -1,17 +1,17 @@
 DEEP Open Catalogue: Pose Estimation
 ====================================
 
-[![Build Status](https://jenkins.indigo-datacloud.eu:8080/buildStatus/icon?job=Pipeline-as-code/DEEP-OC-org/posenet-tf/master)](https://jenkins.indigo-datacloud.eu:8080/job/Pipeline-as-code/job/DEEP-OC-org/job/posenet-tf/job/master/)
+[![Build Status](https://jenkins.indigo-datacloud.eu/buildStatus/icon?job=Pipeline-as-code/DEEP-OC-org/posenet-tf/master)](https://jenkins.indigo-datacloud.eu/job/Pipeline-as-code/job/DEEP-OC-org/job/posenet-tf/job/master/)
 
 
 **Author:** [Lara Lloret Iglesias](https://github.com/laramaktub) (CSIC)
 
 **Project:** This work is part of the [DEEP Hybrid-DataCloud](https://deep-hybrid-datacloud.eu/) project that has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 777435.
 
-This is a plug-and-play tool for real-time pose estimation using deep neural networks. The original model, weights, code, etc. was created by Google and can be found at https://github.com/tensorflow/tfjs-models/tree/master/posenet. PoseNet can be used to estimate either a single pose or multiple poses, meaning there is a version of the algorithm that can detect only one person in an image/video and one version that can detect multiple persons in an image/video. The module implemented here works on pictures (either uploaded or using an URL) and gives as output the different body keypoints with the corresponding coordinates and the associated key score. It also generates an image with the keypoints superimposed.
+This is a plug-and-play tool for real-time pose estimation using deep neural networks. The original model, weights, code, etc. was created by Google and can be found at [here](https://github.com/tensorflow/tfjs-models/tree/master/posenet). PoseNet can be used to estimate either a single pose or multiple poses, meaning there is a version of the algorithm that can detect only one person in an image/video and one version that can detect multiple persons in an image/video. The module implemented here works on pictures (either uploaded or using an URL) and gives as output the different body keypoints with the corresponding coordinates and the associated key score. It also generates an image with the keypoints superimposed.
 
 <p align="center">
-<img src="./reports/figures/posenet.png" alt="spectrogram" width="400">
+<img src="./reports/figures/posenet.png" width="400">
 </p>
 
 To start using this framework run:
@@ -31,17 +31,13 @@ pip install -e .
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
 
-## Workflow
 
-
-### Test
+## Test
 
 You can test the posenet module on a number of tasks: predict a single local image file (or url) or predict multiple images (or urls). 
 
 
-
-#### Running the API
-
+## Running the API
 
 To access this package's complete functionality (both for training and predicting) through an API you have to install the [DEEPaaS](https://github.com/indigo-dc/DEEPaaS) package:
 
