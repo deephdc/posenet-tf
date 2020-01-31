@@ -1,8 +1,25 @@
+from datetime import datetime
+import os
+import shutil
+
 import cv2
 import numpy as np
 
-from posenetclas import constants
 from posenetclas.constants import CONNECTED_PART_INDICES
+
+
+def create_tmp_folder(name=None):
+    if name is None:
+        name = datetime.now().strftime('%Y-%m-%d %H:%M:%S-%f')
+    dir_path = os.path.join("/tmp", name)
+
+    if os.path.isdir(dir_path):
+        shutil.rmtree(dir_path)
+    else:
+        os.mkdir(dir_path)
+
+    return dir_path
+
 
 def valid_resolution(width, height, output_stride=16):
     target_width = (int(width) // output_stride) * output_stride + 1
