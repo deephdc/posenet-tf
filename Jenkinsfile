@@ -1,20 +1,19 @@
 #!/usr/bin/groovy
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.2.3']) _
+@Library(['github.com/indigo-dc/jenkins-pipeline-library@release/1.4.0']) _
 
 def job_result_url = ''
 
 pipeline {
     agent {
-        label 'python'
+        label 'python3.6'
     }
 
     environment {
         author_name = "Lara Lloret Iglesias (CSIC)"
         author_email = "lloret@ifca.unican.es"
         app_name = "speech-to-text-tf"
-        job_location = "Pipeline-as-code/DEEP-OC-org/DEEP-OC-speech-to-text-tf/master"
-        job_location_test = "Pipeline-as-code/DEEP-OC-org/DEEP-OC-speech-to-text-tf/test"     
+        job_location = "Pipeline-as-code/DEEP-OC-org/DEEP-OC-speech-to-text-tf/${env.BRANCH_NAME}"
     }
 
     stages {
@@ -24,22 +23,13 @@ pipeline {
             }
         }
 
-        stage('Style analysis: PEP8') {
+        stage('Style analysis') {
             steps {
                 ToxEnvRun('pep8')
             }
             post {
                 always {
-                    warnings canComputeNew: false,
-                             canResolveRelativePaths: false,
-                             defaultEncoding: '',
-                             excludePattern: '',
-                             healthy: '',
-                             includePattern: '',
-                             messagesPattern: '',
-                             parserConfigurations: [[parserName: 'PYLint', pattern: '**/flake8.log']],
-                             unHealthy: ''
-                    //WarningsReport('PYLint') // 'Flake8' fails..., consoleParsers does not produce any report...
+                    WarningsReport('Pep8')
                 }
             }
         }
@@ -59,23 +49,11 @@ pipeline {
                 }
             }
         }
-        
 
-        stage("Re-build DEEP-OC-speech-to-text-tf Docker images") {
-              when {
-                anyOf {
-                   branch 'master'
-                   branch 'test'
-                   buildingTag()
-               }
-            }
+        stage("Re-build Docker image") {
             steps {
                 script {
-                    job_to_build = "${env.job_location}"
-                    if (env.BRANCH_NAME == 'test') {
-                       job_to_build = "${env.job_location_test}"
-                    }
-                    def job_result = JenkinsBuildJob(job_to_build)
+                    def job_result = JenkinsBuildJob("${env.job_location}")
                     job_result_url = job_result.absoluteUrl
                 }
             }
