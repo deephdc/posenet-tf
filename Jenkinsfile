@@ -51,6 +51,13 @@ pipeline {
         }
 
         stage("Re-build Docker image") {
+            when {
+                anyOf {
+                   branch 'master'
+                   branch 'test'
+                   buildingTag()
+               }
+            }
             steps {
                 script {
                     def job_result = JenkinsBuildJob("${env.job_location}")
