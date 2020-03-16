@@ -27,13 +27,13 @@ CONF = config.conf_dict()
 allowed_extensions = set(['png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG'])  # allow only certain file extensions
 
 
-def catch_error(f):
-    def wrap(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except Exception as e:
-            raise HTTPBadRequest(reason=e)
-    return wrap
+# def catch_error(f):
+#     def wrap(*args, **kwargs):
+#         try:
+#             return f(*args, **kwargs)
+#         except Exception as e:
+#             raise HTTPBadRequest(reason=e)
+#     return wrap
 
 
 def catch_url_error(url_list):
@@ -77,7 +77,7 @@ def warm():
     test_utils.load_predict_model()
 
 
-@catch_error
+# @catch_error
 def predict(**args):
 
     if (not any([args['urls'], args['files']]) or
