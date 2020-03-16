@@ -14,6 +14,15 @@ an image/video and one version that can detect multiple persons in an image/vide
 pictures (either uploaded or using an URL) and gives as output the different body keypoints with the corresponding
 coordinates and the associated key score. It also generates an image with the keypoints superimposed.
 
+You can find more information about it in the [DEEP Marketplace](https://marketplace.deep-hybrid-datacloud.eu/modules/deep-oc-posenet-tf.html).
+
+**Table of contents**
+1. [Installing this module](#installing-this-module)
+    1. [Local installation](#local-installation)
+    2. [Docker installation](#docker-installation)
+2. [Predict](#predict)
+3. [Acknowledgements](#acknowledgments)
+
 <p align="center">
 <img src="./reports/figures/posenet.png" width="400">
 </p>
@@ -57,7 +66,7 @@ docker run -ti -p 5000:5000 -p 6006:6006 -p 8888:8888 deephdc/deep-oc-posenet-tf
 Now open http://0.0.0.0:5000/ui and look for the methods belonging to the `posenetclas` module.
 
 
-## Test
+## Predict
 
 Go to http://0.0.0.0:5000/ui and look for the `PREDICT` POST method. Click on 'Try it out', change whatever test args
 you want and click 'Execute'. You can **either** supply a:
@@ -69,6 +78,11 @@ OR
  Here is an [example](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQOCB8ImJKc6uD12ZvXhM_2EFkqCi1xcd-izsCMWrDOy-ZMq80X) of such an url
  that you can use for testing purposes.
 
+
 ## Acknowledgements
 
 The original model, weights, code, etc. were created by Google and can be found [here](https://github.com/tensorflow/tfjs-models/tree/master/posenet).
+
+If you consider this project to be useful, please consider citing the DEEP Hybrid DataCloud project:
+
+> García, Álvaro López, et al. [A Cloud-Based Framework for Machine Learning Workloads and Applications.](https://ieeexplore.ieee.org/abstract/document/8950411/authors) IEEE Access 8 (2020): 18681-18692. 
